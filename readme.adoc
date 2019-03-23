@@ -1,0 +1,90 @@
+////
+Marked Style: asciidoctor-default
+Custom Processor: true
+Custom Preprocessor: false
+////
+// :author: Jaewe Heo
+// :email: jaeweheo@gmail.com
+:toc:
+:toclevels: 4
+:awscli: https://github.com/aws/aws-cli
+:aws-sam-cli: https://github.com/awslabs/aws-sam-cli
+:configuration: https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html
+:importre-gradle-plugin: https://github.com/importre?utf8=%E2%9C%93&tab=repositories&q=gradle+plugin&type=
+:shadow: https://imperceptiblethoughts.com/shadow/
+
+= AWS SAM Gradle Plugin
+
+{importre-gradle-plugin}[image:https://img.shields.io/badge/importre-gradle%20plugin-informational.svg[alt=importre.gradle]]
+
+Gradle plugin to bind link:{aws-sam-cli}[aws-sam-cli]
+
+== Prerequisites
+
+* Gradle 5.3 ⬆️
+* Python (for ``link:{awscli}[awscli]``, ``link:{aws-sam-cli}[aws-sam-cli]``)
+* ``link:{configuration}[aws configure]`` (for deployment)
+* Docker (for local development)
+
+== Usage
+
+.build.gradle.kts
+[source, kotlin, linenums]
+----
+plugins {
+    id("aws.sam") version "$version"     // <1>
+}
+
+sam {
+    bucket = "your_bucket_name"          // <2>
+    stack = "your_stack_name"            // <3>
+    template = file("your_template.yml") // <4>
+}
+----
+<1> See link:https://plugins.gradle.org/plugin/aws.sam[latest version]
+<2> AWS S3 Bucket Name
+<3> AWS CloudFormation Stack Name
+<4> ``template.yml`` for SAM
+
+
+=== Tasks
+
+==== link:https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-cli-command-reference-sam-local-start-api.html[``runLocalStartApi``]
+
+* runs ```sam local start-api``
+* depends on ``clean`` and ``build``
+
+
+==== link:https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-cli-command-reference-sam-package.html[``packageSamApp``]
+
+* runs ``sam package``
+* depends on ``clean``, ``build`` and ``makeBucket``
+
+==== link:https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-cli-command-reference-sam-deploy.html[``deploySamApp``]
+
+* runs ``sam deploy``
+* depends on ``packageSamApp``
+
+==== ``build``
+
+* finalized by link:{shadow}[``shadowJar``] task
+** Check the fat jar (``$buildDir/libs/${project.name}-all.jar``)
+
+If you'd like to minimize ``jar``,
+
+.build.gradle.kts example
+[source, kotlin, linenums]
+----
+tasks {
+    shadowJar {
+        minimize {
+            exclude(dependency("joda-time:.*:.*"))
+        }
+    }
+}
+----
+
+
+== Sample
+
+See link:https://github.com/importre/aws-sam-gradle-plugin/tree/master/sample[sample directory]

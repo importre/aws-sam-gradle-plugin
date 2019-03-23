@@ -1,0 +1,34 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: "AWS::Serverless-2016-10-31"
+Resources:
+  IndexFunction:
+    Type: "AWS::Serverless::Function"
+    Properties:
+      Handler: "com.importre.example.handler.IndexHandler::handleRequest"
+      CodeUri: "./build/libs/sample-all.jar"
+      Events:
+        IndexApi:
+          Type: "Api"
+          Properties:
+            Path: "/"
+            Method: "get"
+      Runtime: "java8"
+      Timeout: 5
+      MemorySize: 128
+  GreetingFunction:
+    Type: "AWS::Serverless::Function"
+    Properties:
+      Handler: "com.importre.example.handler.GreetingHandler::handleRequest"
+      CodeUri: "./build/libs/sample-all.jar"
+      Events:
+        IndexApi:
+          Type: "Api"
+          Properties:
+            Path: "/greeting"
+            Method: "get"
+      Runtime: "java8"
+      Timeout: 5
+      MemorySize: 128
+Outputs:
+  ProdEndpoint:
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
