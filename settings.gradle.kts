@@ -1,6 +1,11 @@
 rootProject.name = "aws-sam-gradle"
 
-include(":sample")
+include(
+    ":samples:sample",      // single-module
+    ":samples:controllers", // multi-module
+    ":samples:controllers:module1",
+    ":samples:controllers:module2"
+)
 
 includeBuild("./plugin") {
     dependencySubstitution {
