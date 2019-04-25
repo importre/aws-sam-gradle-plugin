@@ -1,5 +1,5 @@
 object Version {
-    const val kotlin = "1.3.21"
+    const val kotlin = "1.3.30"
     const val gson = "2.8.5"
     const val shadow = "5.0.0"
 
