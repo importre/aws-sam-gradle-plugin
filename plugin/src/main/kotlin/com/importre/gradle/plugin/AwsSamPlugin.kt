@@ -19,14 +19,13 @@ class AwsSamPlugin : Plugin<Project> {
         val generatedDir = File(buildDir, "generated")
         val packageFile = File(generatedDir, "package.yaml")
 
-        pluginManager.apply("java")
-        pluginManager.apply("com.github.johnrengelman.shadow")
-
-        val clean = tasks.getByName("clean")
-        val build = tasks.getByName("build")
-        val shadow = tasks.getByName("shadowJar", ShadowJar::class)
-
-        shadow.initShadowJar(build)
+        allprojects.forEach { project ->
+            project.pluginManager.apply("java")
+            project.pluginManager.apply("com.github.johnrengelman.shadow")
+            val build = project.tasks.getByName("build")
+            val shadow = project.tasks.getByName("shadowJar", ShadowJar::class)
+            shadow.initShadowJar(build)
+        }
 
         val installAws by tasks.register("installAws", Exec::class.java) {
             val cmd = listOf("pip", "install", "awscli", "--upgrade", "--user")
@@ -74,11 +73,16 @@ class AwsSamPlugin : Plugin<Project> {
                 "--output-template-file", packageFile.absolutePath
             )
 
-            dependsOn(clean, build, makeBucket)
+            target.allprojects.forEach { project ->
+                val clean = project.tasks.getByName("clean")
+                val build = project.tasks.getByName("build")
 
-            // clean -> build -> makeBucket -> packageSamApp
-            build.mustRunAfter(clean)
-            makeBucket.mustRunAfter(build)
+                dependsOn(clean, build, makeBucket)
+
+                // clean -> build -> makeBucket -> packageSamApp
+                build.mustRunAfter(clean)
+                makeBucket.mustRunAfter(build)
+            }
         }
 
         val printOutputs by tasks.register("printOutputs", Exec::class.java) {
@@ -116,8 +120,12 @@ class AwsSamPlugin : Plugin<Project> {
                 "--template", sam.template.absolutePath
             )
 
-            dependsOn(clean, build)
-            build.mustRunAfter(clean)
+            target.allprojects.forEach { project ->
+                val clean = project.tasks.getByName("clean")
+                val build = project.tasks.getByName("build")
+                dependsOn(clean, build)
+                build.mustRunAfter(clean)
+            }
         }
     }
 
