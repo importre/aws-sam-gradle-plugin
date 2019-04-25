@@ -1,0 +1,34 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: "AWS::Serverless-2016-10-31"
+Resources:
+  Module1Function:
+    Type: "AWS::Serverless::Function"
+    Properties:
+      Handler: "Module1Handler::handleRequest"
+      CodeUri: "./module1/build/libs/module1-all.jar"
+      Events:
+        IndexApi:
+          Type: "Api"
+          Properties:
+            Path: "/module1"
+            Method: "get"
+      Runtime: "java8"
+      Timeout: 5
+      MemorySize: 128
+  Module2Function:
+    Type: "AWS::Serverless::Function"
+    Properties:
+      Handler: "Module2Handler::handleRequest"
+      CodeUri: "./module2/build/libs/module2-all.jar"
+      Events:
+        IndexApi:
+          Type: "Api"
+          Properties:
+            Path: "/module2"
+            Method: "get"
+      Runtime: "java8"
+      Timeout: 5
+      MemorySize: 128
+Outputs:
+  ProdEndpoint:
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
