@@ -73,9 +73,18 @@ class AwsSamPlugin : Plugin<Project> {
                 "--output-template-file", packageFile.absolutePath
             )
 
-            dependsOn(*buildTasks)
             dependsOn(makeBucket)
-            buildTasks.forEach(makeBucket::mustRunAfter)
+
+            target.allprojects.forEach { project ->
+                val clean = project.tasks.getByName("clean")
+                val build = project.tasks.getByName("build")
+
+                dependsOn(clean, build)
+
+                // clean -> build -> makeBucket -> packageSamApp
+                build.mustRunAfter(clean)
+                makeBucket.mustRunAfter(build)
+            }
         }
 
         val printOutputs by tasks.register("printOutputs", Exec::class.java) {
@@ -113,8 +122,12 @@ class AwsSamPlugin : Plugin<Project> {
                 "--template", sam.template.absolutePath
             )
 
-            dependsOn(*buildTasks)
-            buildTasks.forEach(makeBucket::mustRunAfter)
+            target.allprojects.forEach { project ->
+                val clean = project.tasks.getByName("clean")
+                val build = project.tasks.getByName("build")
+                dependsOn(clean, build)
+                build.mustRunAfter(clean)
+            }
         }
     }
 
@@ -122,9 +135,4 @@ class AwsSamPlugin : Plugin<Project> {
         build.finalizedBy(this)
         archiveVersion.set("")
     }
-
-    private val Project.buildTasks
-        get() = allprojects
-            .mapNotNull { it.tasks.findByName("build") }
-            .toTypedArray()
 }
