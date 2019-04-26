@@ -52,7 +52,6 @@ class AwsSamPluginTest {
                 actual = makeBucket.commandLine.joinToString(" ")
             )
 
-            val clean = getByName("clean")
             val build = getByName("build")
             val packageSamApp = getByName<Exec>("packageSamApp")
             assertEquals(
@@ -63,7 +62,7 @@ class AwsSamPluginTest {
                 actual = packageSamApp.commandLine.joinToString(" ")
             )
             assertEquals(
-                expected = listOfNotNull(clean, build, makeBucket).toSet(),
+                expected = listOfNotNull(build, makeBucket).toSet(),
                 actual = packageSamApp.dependsOn
             )
 
